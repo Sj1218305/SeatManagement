@@ -4,3 +4,4 @@ node_js:
 
 script:
 - node app.js
+- echo 'Hello'
