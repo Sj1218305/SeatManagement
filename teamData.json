@@ -1,0 +1,58 @@
+{
+    "Teams":
+    {
+        "Team1":"Team1 Name",
+        "Team2":"Team2 Name",
+        "Team3":"Team3 Name",
+        "Team4":"Team4 Name",
+        "Team5":"Team5 Name"
+    },
+
+    "Team1":{
+        "M1":"T1_Member 1:A",
+        "M2":"T1_Member 2:A",
+        "M3":"T1_Member 3:A",
+        "M4":"T1_Member 4:A",
+        "M5":"T1_Member 5:A",
+        "M6":"T1_Member 6:A"
+    },
+    "Team2":{
+        "M1":"T2_Member 1:A",
+        "M2":"T2_Member 2:A",
+        "M3":"T2_Member 3:A",
+        "M4":"T2_Member 4:A",
+        "M5":"T2_Member 5:A",
+        "M6":"T2_Member 6:A"
+    },
+    "Team3":{
+        "M1":"T3_Member 1:A",
+        "M2":"T3_Member 2:A",
+        "M3":"T3_Member 3:A",
+        "M4":"T3_Member 4:A",
+        "M5":"T3_Member 5:A",
+        "M6":"T3_Member 6:A"
+    },
+    "Team4":{
+        "M1":"T4_Member 1:A",
+        "M2":"T4_Member 2:A",
+        "M3":"T4_Member 3:A",
+        "M4":"T4_Member 4:A",
+        "M5":"T4_Member 5:A",
+        "M6":"T4_Member 6:A"
+    },
+    "Team5":{
+        "M1":"T5_Member 1:A",
+        "M2":"T5_Member 2:A",
+        "M3":"T5_Member 3:A",
+        "M4":"T5_Member 4:A",
+        "M5":"T5_Member 5:A",
+        "M6":"T5_Member 6:A"
+    },
+    "Colors":{
+        "vaccant" : "rgb(255, 0, 0)",
+        "reserved" : "rgb(0, 0, 0)",
+        "hot" : "rgb(255, 165, 0)",
+        "alloted" : "rgb(0, 128, 0)",
+        "disabled" : "rgb(128, 128, 128)"
+    }
+}

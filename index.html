@@ -1,0 +1,1130 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+    <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>var socket = io();</script>
+
+    <script>
+        var isAddingSeat = false
+        var isAddingTable = false
+        var seatCtr = 0;
+        var tableCtr = 0;
+        var settingPosX = 0;
+        var settingPosY = 0;
+        var selectedObj;
+        var isDraggable = false;
+        var isEditable = false;
+        var currentFloor = 1;
+
+        function addSeat(data){
+            //console.log("click end")
+            isAddingSeat = true
+            var newChair = $("#chairImage").clone().appendTo("#theCanvas");
+            seatCtr ++;
+            $(newChair).attr("id", "chairCount_" + seatCtr);
+            //seatManagement($(newChair))
+            updateSeatingCounter()
+        }
+
+        function addTable(){
+            isAddingTable = true
+            var newTable = $("#tableImage").clone().appendTo("#theCanvas");
+            tableCtr ++;
+            $(newTable).attr("id", "tableCount_" + tableCtr);
+        }
+
+        function addTable_L(){
+            isAddingTable = true
+            var newTable = $("#tableImage_L").clone().appendTo("#theCanvas");
+            tableCtr ++;
+            $(newTable).attr("id", "tableCount_" + tableCtr);
+        }
+
+        function addTable_S(){
+            isAddingTable = true
+            var newTable = $("#tableImage_S").clone().appendTo("#theCanvas");
+            tableCtr ++;
+            $(newTable).attr("id", "tableCount_" + tableCtr);
+        }
+
+        function addTable_C(){
+            isAddingTable = true
+            var newTable = $("#tableImage_C").clone().appendTo("#theCanvas");
+            tableCtr ++;
+            $(newTable).attr("id", "tableCount_" + tableCtr);
+        }
+
+
+        
+
+        function changePos(data){
+            selectedObj = data;
+            //console.log("object selected : " + selectedObj.id)
+            isDraggable = true;
+            $("#menuBar").hide();
+        }
+
+      
+
+        function mouseEndPos(e){
+            settingPosX = e.clientX - 20 
+            settingPosY = e.clientY - 20
+            setTimeout(function () {
+             try{
+                 if(isDraggable){
+                    $("#"+selectedObj.id).css("left", settingPosX);
+                 $("#"+selectedObj.id).css("top", settingPosY);
+                 //console.log("should change");
+                 isDraggable = false
+                 }
+             }
+             catch(theError){
+                 ////console.log("error aaya " + theError);
+             }
+          },50)
+        }
+
+        function mouse_position(e)
+        {
+           // console.log(e)
+
+            var offsetValX = 10;
+            var offsetValY = 10;
+            var xPos = (Math.ceil((e.clientX - offsetValX) / 10) * 10 ) - offsetValX;
+            var yPos = (Math.ceil((e.clientY - offsetValY) / 10) * 10) - offsetValX;
+            ////console.log(e)
+            if(isAddingSeat){
+                $('#chairCount_'+seatCtr).css({left: xPos,top: yPos});
+            }
+
+            if(isAddingTable){
+                $('#tableCount_'+tableCtr).css({left: xPos,top:yPos});
+            }
+        }
+
+        document.addEventListener('dragover', function(e){
+            e.preventDefault();
+        })
+
+        function showMenu(data){
+            console.log($(data).hasClass("aSeat"));
+            
+            if($(data).hasClass("aSeat")){
+                var generatedX = $("#" + data.id).css("left").split("px")[0]
+                var generatedY = $("#" + data.id).css("top").split("px")[0]
+                $("#menuBar").css("left", generatedX - 30)
+                $("#menuBar").css("top", generatedY - 40)
+                $("#menuBar").show();
+                var zoomInDiv = $("#menuBar").children()[1];
+                var zoomOutDiv = $("#menuBar").children()[2];
+                $(zoomInDiv).hide();
+                $(zoomOutDiv).hide();
+                rotAngle = 0;
+            }
+            else{
+                var generatedX = $("#" + data.id).css("left").split("px")[0]
+                var generatedY = $("#" + data.id).css("top").split("px")[0]
+                $("#menuBar").css("left", generatedX - 30)
+                $("#menuBar").css("top", generatedY - 40)
+                $("#menuBar").show();
+                var zoomInDiv = $("#menuBar").children()[1];
+                var zoomOutDiv = $("#menuBar").children()[2];
+                $(zoomInDiv).show();
+                $(zoomOutDiv).show();
+                rotAngle = 0;
+            }
+            
+        }
+        
+        function deleteEle(){
+            $(selectedObj).remove();
+            $("#menuBar").hide();
+            updateSeatingCounter();
+        }
+
+        var rotAngle = 0;
+        function rotateEle(){
+            rotAngle += 45
+            $(selectedObj).css('-webkit-transform', 'rotate(' + rotAngle + 'deg)');
+        }
+
+        function incSize(){
+           var currentZoom  = $(selectedObj).css("width");
+           console.log(typeof(currentZoom));
+           var newZoom = (parseFloat(currentZoom) + 10);
+           console.log("write : " + newZoom);
+           $(selectedObj).css("width",newZoom);
+        }
+
+        function decSize(){
+           var currentZoom  = $(selectedObj).css("width");
+           console.log(typeof(currentZoom));
+           var newZoom = (parseFloat(currentZoom) - 10);
+           console.log("write : " + newZoom);
+           $(selectedObj).css("width",newZoom);
+        }
+        
+
+        function hideTheBar(data){
+            $("#menuBar").hide();
+            selectedObj = data;
+        }
+
+       
+
+        function saveProject(){
+            socket.emit("saveTheData", $("#theCanvas").html(),$("#theSeatSelector").html(), seatCtr, tableCtr, currentFloor)
+            //console.log("data saved");
+        }
+
+        function loadProject(){
+            socket.emit("bringData", currentFloor);
+            setTimeout(function(){
+                socket.emit("bringData", currentFloor);
+            },500)
+            
+            //console.log('bringData for ' + currentFloor);
+        }
+
+        var loadProjectCounter = 1;
+        socket.on("loadTheData", function (canvasData, seatData, sCtr, tCtr, curFloor){
+            loadProjectCounter++;
+            if(loadProjectCounter % 2 == 0){
+
+            }
+            else{
+                setTimeout(function () {
+                    //console.log("data has been loaded for : " + curFloor)
+                $("#theCanvas").html(canvasData);
+                $("#theSeatSelector").html(seatData);
+                seatCtr = sCtr;
+                tableCtr = tCtr;
+                currentFloor = curFloor;
+                updateSeatingCounter()
+                setTimeout(function(){
+                    $('.collapsible').collapsible();
+                },100)
+                }, 100)
+            }
+        })
+
+        function enableEditing(){
+            $("#addSeat").attr("onclick", "addSeat(this)");
+            $("#addTable").attr("onclick", "addTable()");
+            $("#addTable_L").attr("onclick", "addTable_L()");
+            $("#addTable_S").attr("onclick", "addTable_S()");
+            $("#addTable_C").attr("onclick", "addTable_C()");
+            M.toast({html: 'editing enabled', classes: 'rounded green', displayLength: '500'});
+            for(var i = 0; i <  $(".cursor").length; i++){
+                var theEle = $(".cursor")[i]
+                $(theEle).attr("onmousedown","hideTheBar(this)");
+                $(theEle).attr("ondblclick","showMenu(this)");
+                $(theEle).attr("ondrag","changePos(this)");
+                if($(theEle).hasClass("aSeat")){
+                    $(theEle).attr("onclick", "isAddingSeat = false");
+                }
+                else{
+                    $(theEle).attr("onclick", "isAddingTable = false");
+                }
+
+
+            }
+            
+        }
+
+        function disableEditing(){
+            $("#addSeat").removeAttr("onclick");
+            $("#addTable").removeAttr("onclick");
+            $("#addTable_L").removeAttr("onclick");
+            $("#addTable_S").removeAttr("onclick");
+            $("#addTable_C").removeAttr("onclick");
+            M.toast({html: 'editing disabled', classes: 'rounded black', displayLength: '500'});
+            for(var i = 0; i <  $(".cursor").length; i++){
+                var theEle = $(".cursor")[i]
+                $(theEle).removeAttr("onmousedown");
+                $(theEle).removeAttr("ondblclick");
+                $(theEle).removeAttr("ondrag");
+                $(theEle).removeAttr("onclick");
+                if($(theEle).hasClass("aSeat")){
+                    $(theEle).attr("onclick", "bookSeat(this)");
+                }
+            }
+        }
+
+        function updateSeatingCounter(){
+            var vaccantSeats = 0;
+            var occupiedSeats = 0;
+            var hotSeats = 0;
+            var allotedSeats = 0;
+            var disabledSeats = 0;
+            var totalSeats = 0;
+
+           
+
+            for(var i = 1; i < $(".aSeat").length; i++)
+            {
+                var ele = $(".aSeat")[i];
+                if($(ele).css("opacity") == "0.1"){
+                        //console.log("opacity change found : " + $(ele).attr("id"));
+                        
+                }
+                else{
+                    totalSeats++;
+                    //console.log("opacity change not found : " +  $(ele).attr("id"));
+                    if($(ele).css("color") == "rgb(255, 0, 0)"){ //red
+                     vaccantSeats++;
+                     $("#vaccantSeats").html(vaccantSeats);
+                 }
+                 else{
+                    $("#vaccantSeats").html(vaccantSeats);
+                 }
+
+                 if($(ele).css("color") == "rgb(0, 0, 0)"){ //black
+                    occupiedSeats++;
+                     $("#reservedSeats").html(occupiedSeats);
+                 }
+                 else{
+                    $("#reservedSeats").html(occupiedSeats);
+                 }
+                
+                 if($(ele).css("color") == "rgb(255, 165, 0)"){ //orange
+                     hotSeats++;
+                     $("#hotSeats").html(hotSeats);
+                 }
+                 else{
+                    $("#hotSeats").html(hotSeats);
+                 }
+                 
+
+                 if($(ele).css("color") == "rgb(0, 128, 0)"){ //green
+                     allotedSeats++;
+                     $("#allotSeats").html(allotedSeats);
+                 }
+                 else{
+                    $("#allotSeats").html(allotedSeats);
+                 }
+
+                 if($(ele).css("color") == "rgb(128, 128, 128)"){ //grey
+                    disabledSeats++;
+                     $("#disabledSeats").html(disabledSeats);
+                 }
+                 else{
+                    $("#disabledSeats").html(disabledSeats);
+                 }
+                }
+                $("#totalSeats").html(totalSeats);
+                $("#vaccantSeats").html(vaccantSeats);
+                $("#reservedSeats").html(occupiedSeats);
+                $("#hotSeats").html(hotSeats);
+                $("#allotSeats").html(allotedSeats);
+                $("#disabledSeats").html(disabledSeats);
+            }
+            //seatManagement();
+            
+	
+		
+        }   
+
+        function createDropDown(){
+            //console.log("creating dropdown");
+            var teamName = [];
+            for(var i = 1; i <= Object.keys(fromConfigFile)[0].length; i++){
+                    teamName[i] = fromConfigFile["Teams"]["Team"+i];
+                    //console.log(teamName[i]);
+                    $(".selectTeam").append("<option value='"+i+"'>"+teamName[i]+"</option>");
+            }   
+            // for(var i = 0; i < $(".selectTeam").length; i++){
+            //     //console.log("entering loop : " + i);
+            //     var theEle = $(".selectTeam")[i];
+            //     //console.log("............"+$(theEle).attr("hasValue")+"..........");
+
+            //      if($(theEle).attr("hasValue") == "true"){
+            //              //console.log("already has a value, skipping");
+            //      }
+            //      else{
+            //          //console.log("value not found.");
+            //          for(var j = 1; j< teamName.length;j++){
+            //              $(theEle).append("<option value='"+j+"'>"+teamName[j]+"</option>");
+            //              //console.log("value appended");
+            //              }
+            //      }
+            // }
+        }
+    
+        function bookSeat(data){
+            if($(data).attr("isBooked") == "false"){
+                //console.log("the seat was not booked");
+                var theSeat = $(data).attr("id");
+                // //console.log($("#"+theSeat))
+                $("#"+theSeat).css("color", fromConfigFile.Colors.reserved);
+                $(data).attr("isBooked", "true");
+                
+                //console.log("now booked");
+                setTimeout(function(){
+                    seatManagement(data)
+                },100)
+                setTimeout(function (){
+                            $("#li_"+theSeat).click();
+                            //document.getElementById("li_"+theSeat).scrollIntoView();
+                       },500)
+                
+                M.toast({html: 'seat booked : ' + $(data).attr("id"), classes: 'rounded green', displayLength: '500'});
+            }
+            else{
+                // var gettingLi = document.querySelectorAll("li");
+                // for(var i = 0; i<gettingLi.length;i++){
+                //     var theEle = $(gettingLi)[i];
+                //     if($(theEle).attr("theSeat") == $(data).attr("id")){
+                //        var theID = "li_"+$(theEle).attr("theSeat");
+                //        //console.log($("#"+theID));
+                //        setTimeout(function (){
+                //             $("#"+theID).click();
+                //             document.getElementById(theID).scrollIntoView();
+                //        },50)
+                //     }
+                // }
+                var theSeat = $(data).attr("id");
+                setTimeout(function (){
+                            $("#li_"+theSeat).click();
+                            //document.getElementById("li_"+theSeat).scrollIntoView();
+                       },100)
+            }
+            updateSeatingCounter();
+        }
+
+        function seatManagement(data){
+            //console.log("creating seat")
+            //$("#theSeatingList").html("");
+          //  for(var i = 1; i < $(".aSeat").length;i++){
+             //   var data = $(".aSeat")[i];
+               // if($(data).attr("isBooked") == "true"){
+                    var theHTML = "<li id='liParent_"+$(data).attr("id")+"' onmouseout='deHighlightSeat(this)' style='display:none' onmouseover='highlightSeat(this)'  theSeat = '"+$(data).attr("id")+"'>"
+                    theHTML += '<div id="li_'+$(data).attr("id")+'" class="collapsible-header"><i class="material-icons">filter_drama</i>'+$(data).attr("id")+'</div>';
+                    theHTML +=  '<div class="collapsible-body">'
+                    theHTML +=  '<select onchange="selectTeam(this)" id="sT_'+$(data).attr("id")+'" hasValue="false" class="browser-default selectTeam"><option selected disabled>Select Team</option></select>'
+                    theHTML +=  '<select isAlloted="false" onchange="selectTeamMember(this)" id="sTM_'+$(data).attr("id")+'" class="browser-default selectTeamMember"><option selected disabled>Select Team Member</option></select>'
+                    theHTML += '</br><div class="center">'
+                    theHTML += '<span id="vaccanteSeat_'+$(data).attr("id")+'" style="vertical-align:top;width:50px;display:inline-block;font-size:12px"><i class="material-icons distanctIcons red-text" onclick="vaccantSeat('+$(data).attr("id")+')">event_seat</i></br>Vaccate</br>Seat</span>'
+                    theHTML += '<span id="hotSeat_'+$(data).attr("id")+'"style="vertical-align:top;width:50px;display:inline-block;font-size:12px"><i class="material-icons distanctIcons orange-text" onclick="hotSeat('+$(data).attr("id")+')">event_seat</i></br>Hot</br>Seat</span>'
+                    theHTML += '<span id="disableSeat_'+$(data).attr("id")+'"style="vertical-align:top;width:50px;display:inline-block;font-size:12px"><i class="material-icons distanctIcons grey-text" onclick="disableSeat('+$(data).attr("id")+')">event_seat</i></br>Disable</br>Seat</span>'
+                    theHTML += '<span id="deleteSeat_'+$(data).attr("id")+'"style="vertical-align:top;width:50px;display:inline-block;font-size:12px"><i class="material-icons distanctIcons red-text" onclick="deleteSeat('+$(data).attr("id")+')">delete</i>Delete</br>Seat</span>'
+                    theHTML +=  '</div></div></li>'
+                    $("#theSeatingList").append(theHTML);
+                    var teamName = [];
+                    setTimeout(function(){
+                        $("#liParent_"+$(data).attr("id")).fadeIn();
+                        // setTimeout(function(){
+                        //     $("#liParent_"+$(data).attr("id"))[0].scrollIntoView();
+                        // },50)
+                        for(var i = 1; i <= Object.keys(fromConfigFile)[0].length; i++){
+                    teamName[i] = fromConfigFile["Teams"]["Team"+i];
+                    //console.log(teamName[i]);
+                    $('#sT_'+$(data).attr("id")).append("<option value='"+i+"'>"+teamName[i]+"</option>");
+                    }  
+                    },100) 
+                    $('.tooltipped').tooltip();
+                    
+               // }
+           // }
+        }
+
+        function hotSeat(data){
+            //console.log("hotseat");
+            $("#"+data.id).css("color", "orange");
+            updateSeatingCounter();
+        }
+
+        function disableSeat(data){
+            //console.log("disableseat");
+            $("#"+data.id).css("color", "grey");
+            updateSeatingCounter();
+        }
+
+        function vaccantSeat(data){
+            if($("#teamSelection_nav").val() == 0){ //admin
+            //console.log("vaccantseat");
+            $("#"+data.id).css("color", "red");
+            $("#"+data.id).attr("isBooked", "false")
+            $("#"+data.id).attr("allocatedmember", "0")
+            $("#"+data.id).attr("allocatedto", "0")
+            $("#li_"+data.id).parent().remove();
+            //M.toast({html: 'seat freed : ' + data.id, classes: 'rounded red'});
+            $("#"+data.id).removeClass("green pulse");
+            updateSeatingCounter();
+            }
+            else{
+                //console.log("vaccantseat");
+                $("#"+data.id).css("color", "black");
+                $("#"+data.id).attr("isBooked", "true")
+                $("#"+data.id).attr("allocatedto", $("#teamSelection_nav").val())
+                $("#"+data.id).attr("allocatedmember", "0")
+                $("#sT_"+data.id).val($("#teamSelection_nav").val());
+                $("#sT_"+data.id).attr("disabled", "disabled");
+                $("#sTM_"+data.id).val(0);
+                //$("#li_"+data.id).parent().remove();
+                //M.toast({html: 'seat freed : ' + data.id, classes: 'rounded red'});
+                $("#"+data.id).removeClass("green pulse");
+                updateSeatingCounter();
+            }
+            
+        }
+
+        function deleteSeat(data){
+            //console.log("deleteSeat");
+            //console.log(data);
+            $("#"+data.id).remove();
+            $("#li_"+data.id).parent().remove();
+            updateSeatingCounter()
+        }
+
+        var fromConfigFile = {};
+        socket.on("fromConfigFile", function (data){
+                fromConfigFile = data;
+                //console.log("config file loaded");
+        })
+
+        function selectTeam(data){
+            var theID = $(data).attr("id");
+            var gettingSeat = $(data).attr("id").split("sT_")[1];
+            //console.log(gettingSeat);
+            selectedOption = document.getElementById(theID)
+            for(var i = 0; i< selectedOption.options.length;i++){
+                var theOption = selectedOption.options[i];
+                ////console.log($(theOption))
+                $(theOption).removeAttr("selected");
+            }
+            $(selectedOption.options[selectedOption.options.selectedIndex]).attr("selected", "selected");
+            var selectTeamMemberDiv = $(data).parent().children()[1];
+            $(selectTeamMemberDiv).html("");
+            $(selectTeamMemberDiv).append("<option value='0' selected disabled>Select Team Member</option>");
+              for(var i = 1; i <= Object.keys(fromConfigFile)[$(data).val()].length; i++){
+                      var teamMemberList = fromConfigFile["Team"+$(data).val()]["M"+i];
+                      var teamMemberName = teamMemberList.split(":")[0];
+                      var teamMemberNameStatus = teamMemberList.split(":")[1];
+                      if(teamMemberNameStatus == "A"){
+                          $(selectTeamMemberDiv).append("<option theMember='M"+i+"' value='"+teamMemberName+"'>"+teamMemberName+"</option>");
+                      }
+                      else{
+                        $(selectTeamMemberDiv).append("<option theMember='M"+i+"' disabled value='"+teamMemberName+"'>"+teamMemberName+"</option>");
+                      }
+              }
+            $("#"+gettingSeat).attr("allocatedTo", $("#sT_"+gettingSeat).val())
+
+        }
+
+        function selectTeamMember(data){
+            
+
+            function alreadyBookedSeat(data){
+                $(data).val(0);
+                setTimeout(function (){
+                    var theID = $(data).attr("id").split("sTM_")[1];
+                        console.log(theID);
+                    if($("#teamSelection_nav").val() == 0){ //admin
+                            //console.log("vaccantseat");
+                            $("#"+theID).css("color", "red");
+                            $("#"+theID).attr("isBooked", "false")
+                            $("#"+theID).attr("allocatedmember", "0")
+                            $("#"+theID).attr("allocatedto", "0")
+                            $("#li_"+theID).parent().remove();
+                            //M.toast({html: 'seat freed : ' + data.id, classes: 'rounded red'});
+                            $("#"+theID).removeClass("green pulse");
+                            updateSeatingCounter();
+                            }
+                            else{
+                                //console.log("vaccantseat");
+                                $("#"+theID).css("color", "black");
+                                $("#"+theID).attr("isBooked", "true")
+                                $("#"+theID).attr("allocatedto", $("#teamSelection_nav").val())
+                                $("#"+theID).attr("allocatedmember", "0")
+                                $("#sT_"+theID).val($("#teamSelection_nav").val());
+                                $("#sT_"+theID).attr("disabled", "disabled");
+                                $("#sTM_"+theID).val(0);
+                                //$("#li_"+data.id).parent().remove();
+                                //M.toast({html: 'seat freed : ' + data.id, classes: 'rounded red'});
+                                $("#"+theID).removeClass("green pulse");
+                                updateSeatingCounter();
+                            }
+                    console.log("vaccate done")
+                },100)
+                alert("seat is already booked")
+            }
+
+            function settingSeat(data){
+                var getSeatPos = $(data).parent().parent().attr("theSeat");
+                    $("#"+ getSeatPos).css("color", "green");
+                    //console.log("seat alloted to the member");
+                    var settingValForDD = $(data).parent().children()[0];
+                    $(settingValForDD).attr("hasValue", "true");
+                    $("#"+ getSeatPos).attr("hasValue", "true");
+                    var theID = $(data).attr("id");
+                    selectedOption = document.getElementById(theID)
+                    for(var i = 0; i< selectedOption.options.length;i++){
+                        var theOption = selectedOption.options[i];
+                        //console.log($(theOption))
+                        $(theOption).removeAttr("selected");
+                    }
+                    $(selectedOption.options[selectedOption.options.selectedIndex]).attr("selected", "selected");
+                    $("#"+ getSeatPos).attr("allocatedmember", $(data).val());
+                    $(data).attr("isAlloted", "true")
+                    updateSeatingCounter();
+            }
+
+            var gettingLi = document.querySelectorAll("li");
+
+            if($(data).attr("isAlloted") == "false"){
+                console.log("false mila");
+                if(gettingLi.length == 1){
+                    console.log("sirf one li hai");
+                     //do compute here
+                     settingSeat(data)
+                }
+                else{
+                    console.log("multiple li hai");
+                    var gettingLi = document.querySelectorAll("li");
+                    var isAlreadyBookedCounter = 0;
+                    var isAlreadyBooked = false;
+                    for(var i = 0 ; i<gettingLi.length;i++){
+                            var theEle = gettingLi[i].children[1].children[1].value;
+                            if(theEle == $(data).val()){
+                                isAlreadyBookedCounter++;
+                            }
+                    }
+                    if(isAlreadyBookedCounter == 2){
+                                    console.log("exisiting value");
+                                    alreadyBookedSeat(data);
+                                }
+                    else{
+                        console.log("new value inserting value")
+                        //do compute here
+                        settingSeat(data)
+                    }
+                }
+            }
+            else{
+                console.log("true mila");
+                var gettingLi = document.querySelectorAll("li");
+                    var isAlreadyBookedCounter = 0;
+                    var isAlreadyBooked = false;
+                    for(var i = 0 ; i<gettingLi.length;i++){
+                            var theEle = gettingLi[i].children[1].children[1].value;
+                            if(theEle == $(data).val()){
+                                isAlreadyBookedCounter++;
+                            }
+                    }
+                    if(isAlreadyBookedCounter == 2){
+                                    console.log("exisiting value");
+                                    alreadyBookedSeat(data);
+                                }
+                    else{
+                        console.log("new value inserting value")
+                        //do compute here
+                        settingSeat(data)
+                        
+                    }
+            }
+
+           
+      
+        }
+
+        function highlightSeat(data){
+            // //console.log("mousein");
+            // //console.log($(data).attr("theSeat"));
+            $("#"+$(data).attr("theSeat")).addClass("green pulse");
+            $("#"+$(data).attr("theSeat")).css("border-radius", "100px");
+            //$("#"+$(data).attr("theSeat")).css("padding", "10px");
+            var coloredDiv = $(data).children()[0];
+            $(coloredDiv).css("background-color", "rgba(0, 0, 0, 0.2)");
+
+        }
+
+        function deHighlightSeat(data){
+            // //console.log("mouseout");
+            // //console.log($(data).attr("theSeat"));
+            $("#"+$(data).attr("theSeat")).removeClass("green pulse");
+            $("#"+$(data).attr("theSeat")).css("border-radius", "0px");
+            //$("#"+$(data).attr("theSeat")).css("padding", "00px");
+            var coloredDiv = $(data).children()[0];
+            $(coloredDiv).css("background-color", "rgba(255, 255, 255)");
+        }
+
+        $(document).ready(function(){
+            $('.collapsible').collapsible();
+            $('.tooltipped').tooltip();
+            $('.modal').modal();
+            $("#theCanvas").click(function(){
+            $("#menuBar").hide();
+           })
+        });
+            
+
+
+        function selectTeamProfile(teamCounter){
+            var actualTeamMemberCount = 0;
+            var willDisableVaccant = false;
+            var readingLiAll = document.querySelectorAll("li");
+            for(var i = 0 ; i < document.querySelectorAll("li").length; i ++){
+                ////console.log(i)
+                var readingLi = $(readingLiAll)[i];
+                var theID = $(readingLi).children()[1].children[0].id;
+                var selectedOption = document.getElementById(theID)
+                var selectedOptionDiv  = selectedOption.options[selectedOption.options.selectedIndex];
+                var selectedOptionDivVal = ($(selectedOption.options[selectedOption.options.selectedIndex]).val());
+                ////console.log(selectedOptionDivVal);
+                var selDivID = $(selectedOption).attr("id").split("sT_")[1];
+                if(teamCounter == selectedOptionDivVal){
+                    actualTeamMemberCount++;
+                    ////console.log(fromConfigFile["Team"+selectedOptionDivVal])
+                    ////console.log(selDivID);
+                    $("#"+selDivID).css("opacity", "1");
+                    $("#"+selDivID).attr("onclick", "bookSeat(this)");
+                    $("#li_"+selDivID).parent().show();
+                    $("#sT_"+selDivID).attr("disabled", "disabled");
+                    //console.log("actualTeamMemberCount : " + actualTeamMemberCount)
+                    $("#hotSeat_"+selDivID).hide();
+                    $("#disableSeat_"+selDivID).hide();
+                    $("#deleteSeat_"+selDivID).hide();
+                    
+                }
+                else{
+                    if($("#"+selDivID).css("color") == fromConfigFile.Colors.hot){
+                        $("#"+selDivID).css("opacity", "0.1");
+                        $("#"+selDivID).removeAttr("onclick");
+                        $("#li_"+selDivID).parent().hide();
+                    }
+                    else{
+                        $("#"+selDivID).css("opacity", "0.1");
+                        $("#"+selDivID).removeAttr("onclick");
+                        $("#li_"+selDivID).parent().hide();
+                    }
+                }
+
+                if(teamCounter == 0){
+                    actualTeamMemberCount++
+                    $("#"+selDivID).css("opacity", "1")
+                    //console.log("admin selected");
+                    $("#"+selDivID).attr("onclick", "bookSeat(this)");
+                    $("#li_"+selDivID).parent().show();
+                    $("#sT_"+selDivID).removeAttr("disabled");
+                    $("#hotSeat_"+selDivID).show();
+                    $("#disableSeat_"+selDivID).show();
+                    $("#deleteSeat_"+selDivID).show();
+                    //console.log("actualTeamMemberCount : " + actualTeamMemberCount)
+                }
+            }
+            
+            if(teamCounter == 0){
+                for(var i = 0; i < $(".aSeat").length;i++){
+                    var theEle = $(".aSeat")[i];
+                     if($(theEle).css("color") == fromConfigFile.Colors.vaccant){
+                        $(theEle).css("opacity", "1");
+                        $(theEle).attr("onclick", "bookSeat(this)");
+                    }
+                    else{
+
+                    }
+                }
+            }
+            else{
+                for(var i = 0; i < $(".aSeat").length;i++){
+                    var theEle = $(".aSeat")[i];
+                     if($(theEle).css("color") == fromConfigFile.Colors.vaccant){
+                        $(theEle).css("opacity", "0.1");
+                        $(theEle).removeAttr("onclick");
+                    }
+                    else{
+
+                    }
+                }
+            }
+            setTimeout(function(){
+                updateSeatingCounter();
+            },100)
+            return actualTeamMemberCount;
+
+        }
+
+        function teamSelection_Nav(){
+                if($("#teamSelection_nav").attr("isFilled") == "True")
+                {
+                   // //console.log("skipping, already has the value")
+                }
+                else{
+                    for(var i = 1; i <= Object.keys(fromConfigFile)[0].length; i++){
+                      var teamMemberList = fromConfigFile["Teams"]["Team"+i];
+                      $("#teamSelection_nav").append("<option value='"+i+"'>"+teamMemberList+"</option>");
+                    }
+                    $("#teamSelection_nav").attr("isFilled", "True");
+                  //  //console.log("first click")
+                }
+            }
+
+
+            function floorSel_nav(data){
+                //console.log("currently at floor : " + data)
+                    currentFloor = data;
+                    setTimeout(function (){
+                        //loadProject();
+                        $("#theCanvas").html("");
+                        $("#theSeatingList").html("");
+                    },100);
+                    $("#theToolBar").show()
+                }
+
+        
+
+        function genRep(data){
+            $("#canvas-holder").html("");
+            $("#canvas-holder").append('<canvas id="chart-area" ></canvas>');
+
+            if(data == 0){
+              
+          
+
+            var config = {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [
+                        $("#reservedSeats").html(),
+                        $("#hotSeats").html(),
+                        $("#allotSeats").html(),
+                        $("#vaccantSeats").html(),
+                        $("#disabledSeats").html()
+                        ],
+                        backgroundColor: [
+                            "#000000",
+                            "rgb(255, 165, 0)",
+                            "rgb(0, 128, 0)",
+                            "rgb(255, 0, 0)",
+                            "rgb(128, 128, 128);",
+                        ],
+                        label: 'Dataset 1'
+                    }],
+                    labels: [
+                        $("#reservedSeats").html() + ' : Reserved Seats',
+                        $("#hotSeats").html() + ' : Hot Seats',
+                        $("#allotSeats").html() + ' : Alloted Seats',
+                        $("#vaccantSeats").html() + ' : Vaccant Seats',
+                        $("#disabledSeats").html() + ' : Disabled Seats'
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'right',
+                    },
+                }
+            };
+                var ctx = document.getElementById('chart-area').getContext('2d');
+                window.myPie = new Chart(ctx, config);
+                selectTeamProfile($("#teamSelection_nav").val())
+            }
+            else if(data == "-1"){
+                team1Mem = selectTeamProfile(1);
+                team2Mem = selectTeamProfile(2);
+                team3Mem = selectTeamProfile(3);
+                team4Mem = selectTeamProfile(4);
+                team5Mem = selectTeamProfile(5);
+                
+                
+              
+
+            var config = {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [
+                        team1Mem,
+                        team2Mem,
+                        team3Mem,
+                        team4Mem,
+                        team5Mem
+                        ],
+                        backgroundColor: [
+                            "#000000",
+                            "rgb(255, 165, 0)",
+                            "rgb(0, 128, 0)",
+                            "rgb(255, 0, 0)",
+                            "rgb(128, 128, 128);",
+                        ],
+                        label: 'Dataset 1'
+                    }],
+                    labels: [
+                        team1Mem + " : Team1 Name",
+                        team2Mem + " : Team2 Name",
+                        team3Mem + " : Team3 Name",
+                        team4Mem + " : Team4 Name",
+                        team5Mem + " : Team5 Name"
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'right',
+                    },
+                }
+            };
+                
+            var ctx = document.getElementById('chart-area').getContext('2d');
+                window.myPie = new Chart(ctx, config);
+                selectTeamProfile($("#teamSelection_nav").val())
+
+            }
+            else{
+               //console.log("................." + data + "..............")
+                selectTeamProfile($("#chartSelectOption").val())
+                updateSeatingCounter()
+            var config = {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [
+                        $("#reservedSeats").html(),
+                        $("#allotSeats").html()
+                        ],
+                        backgroundColor: [
+                            "#000000",
+                            "rgb(0, 128, 0)"
+                        ],
+                        label: 'Dataset 1'
+                    }],
+                    labels: [
+                        $("#reservedSeats").html() + ' : Reserved Seats',
+                        $("#allotSeats").html() + ' : Alloted Seats'
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'right',
+                    },
+                }
+            };
+                var ctx = document.getElementById('chart-area').getContext('2d');
+                window.myPie = new Chart(ctx, config);
+                selectTeamProfile($("#teamSelection_nav").val())
+                updateSeatingCounter()
+            }
+
+           
+            }
+
+            function clearReportSelect(){
+                $("#chartSelectOption").html("");
+                if($("#teamSelection_nav").val() == 0){
+                    $("#chartSelectOption").append('<option selected disabled>Select Team</option><option value="0">Admin</option><option value="-1">All Teams</option>');
+                    for(var i = 1; i <= Object.keys(fromConfigFile)[0].length; i++){
+                      var teamMemberList = fromConfigFile["Teams"]["Team"+i];
+                      $("#chartSelectOption").append("<option value='"+i+"'>"+teamMemberList+"</option>");
+              }
+                }
+                else{
+                    $("#chartSelectOption").append('<option selected value="'+$("#teamSelection_nav").val()+'">'+ fromConfigFile["Teams"]["Team"+$("#teamSelection_nav").val()] +'</option>');
+                    //$("#chartSelectOption").append('<option selected disabled value="'+$("#teamSelection_nav").val()+'">'+ fromConfigFile["Teams"]["Team"+$("#teamSelection_nav").val()] +'</option>');
+                    setTimeout(function () {
+                        genRep($("#teamSelection_nav").val());
+                    },200)
+                }
+                $("#canvas-holder").html("");
+                $("#canvas-holder").append('<canvas id="chart-area" ></canvas>');
+               
+            }
+
+            function viewSideBar(){
+                $("#theSeatSelector").fadeIn();
+                $("#theSeatSelector").animate({"right":"0"});
+            }
+
+            function hideSideBar(){
+                $("#theSeatSelector").animate({"right":"-350px"});
+                $("#theSeatSelector").fadeOut();
+                disableOverFlow()
+            }
+
+            function viewLegend(){
+                $("#theLegend").animate({"top":"80px"});
+            }
+            function hideLegend(){
+                $("#theLegend").animate({"top":"-200px"});
+                disableOverFlow()
+            }
+            function disableOverFlow(){
+                setTimeout(function () {
+                    //$("body").css("overflow", "hidden");
+                },50);
+            }
+
+            var zoomVal = 1;
+            function zoomIn(e){
+                 console.log(e)
+                // console.log(e.y)
+                // if(e.deltaY < 0 ){
+                //     console.log("zoom in");
+                //     zoomVal += 0.1
+                //     $("#theCanvas").css("zoom",zoomVal) 
+                // }
+                // else{
+                //     console.log("zoom out");
+                //     zoomVal -= 0.1
+                //     $("#theCanvas").css("zoom",zoomVal) 
+                // }
+              
+            }
+
+
+            function panArea(e){
+                e.preventDefault();
+                console.log(e)
+                if(e.button == "1"){
+                     console.log("middle mouse cliked at : " + e.clientX, e.clientY);
+                     
+                 }
+            }
+
+
+            function panAreaFinal(e){
+                e.preventDefault();
+                console.log(e)
+                if(e.button == "1"){
+                    console.log("middle mouse released at : " + e.clientX, e.clientY);
+                    // $("#theCanvas").css("top", e.clientX);
+                    // $("#theCanvas").css("left", e.clientY);
+                    console.log($("#theCanvas").position());
+                 }
+            }
+         
+            
+           
+    </script>
+
+
+</head>
+<body onmousemove="mouse_position(event)" onmouseover="mouseEndPos(event)" style="overflow: auto;">
+<!-- <body onmousemove="mouse_position(event)" onmouseover="mouseEndPos(event)"> -->
+
+<nav onmousedown="teamSelection_Nav()" style="width:2000px">
+    
+    <select class="browser-default" onchange="floorSel_nav(this.value)" id="floorSel_nav" style="margin-top: 10px;width:200px;float:left;margin-left: 100px;">
+        <option selected disabled value="0">Select Floor</option>
+        <option value="1">Floor 1</option>
+        <option value="2">Floor 2</option>
+        <option value="3">Floor 3</option>
+    </select>
+    
+    <select isFilled="false" onchange="selectTeamProfile(this.value)" class="browser-default" id="teamSelection_nav" style="margin-top: 10px;width:200px;float:left;margin-left: 100px;">
+        <option disabled >Select Team</option>
+        <option value="0" selected>Admin</option>
+    </select>
+ 
+    
+
+</nav>
+
+    <div id="theToolBar" style="position: absolute;top:150px;left:6px;width: 50px;background-color: black;border-radius: 10px;padding-top: 10px;padding-bottom: 10px;display:none">
+        <a class="tooltipped" data-position="right" data-tooltip="Add a seat">
+            <span class="material-icons toolIcon disabled" id="addSeat" onclick="addSeat(this)">event_seat</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Add Conference Table">
+            <span class="material-icons toolIcon" id="addTable" onclick="addTable()">view_compact</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Add L Shape Table">
+            <span class="material-icons toolIcon" id="addTable_L" onclick="addTable_L()">view_compact</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Add Small Table">
+            <span class="material-icons toolIcon" id="addTable_S" onclick="addTable_S()">stop</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Add Ciruclar Table">
+            <span class="material-icons toolIcon" id="addTable_C" onclick="addTable_C()">stop_circle</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Save">
+            <span class="material-icons toolIcon" onclick="saveProject()">save</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Load">
+            <span class="material-icons toolIcon" onclick="loadProject()">cloud_circle</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Enable Editing">
+            <span class="material-icons toolIcon" onclick="enableEditing()">edit</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="Disable Editing">
+            <span class="material-icons toolIcon" onclick="disableEditing()">done_all</span>
+        </a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="View Sidebar">
+            <span class="material-icons toolIcon" onclick="viewSideBar()">view_sidebar</span>
+        </a>
+        <br><br>
+            <a class="modal-trigger tooltipped" data-position="right" data-tooltip="View Reports in Chart" href="#pieChartModal" onclick="clearReportSelect()"><span class="material-icons toolIcon">pie_chart</span></a>
+        <br><br>
+        <a class="tooltipped" data-position="right" data-tooltip="View Legend">
+            <span class="material-icons toolIcon" onclick="viewLegend()">receipt_long</span>
+        </a>
+        
+    </div>
+
+    <i id="chairImage" class="material-icons cursor aSeat" allocatedto="0" allocatedMember="0" isBooked="false" onmousedown="hideTheBar(this)" ondblclick="showMenu(this)" draggable="true" ondrag="changePos(this)" onclick="isAddingSeat = false" src="img/chair.jpg" style="font-size: 30px;position: absolute;top:-1000px;color:red;padding:10px;">event_seat</i>
+    <img id="tableImage" class="cursor aTable" onmousedown="hideTheBar(this)" ondblclick="showMenu(this)" draggable="true" ondrag="changePos(this)" onclick="isAddingTable = false" src="img/table.png" style="width: 150px;position: absolute;top:-1000px;border:0px solid red">
+    <img id="tableImage_L" class="cursor aTable" onmousedown="hideTheBar(this)" ondblclick="showMenu(this)" draggable="true" ondrag="changePos(this)" onclick="isAddingTable = false" src="img/table_L.png" style="width: 100px;position: absolute;top:-1000px;border:0px solid red">
+    <img id="tableImage_S" class="cursor aTable" onmousedown="hideTheBar(this)" ondblclick="showMenu(this)" draggable="true" ondrag="changePos(this)" onclick="isAddingTable = false" src="img/table_S.png" style="width: 100px;position: absolute;top:-1000px;border:0px solid red">
+    <img id="tableImage_C" class="cursor aTable" onmousedown="hideTheBar(this)" ondblclick="showMenu(this)" draggable="true" ondrag="changePos(this)" onclick="isAddingTable = false" src="img/table_C.png" style="width: 100px;position: absolute;top:-1000px;border:0px solid red">
+    <div>
+        <div id="theCanvas" style="width:2000px;height: 2000px;background-color: transparent;border:0px solid black;"></div>
+        <div id="theSeatSelector" style="position: absolute;top:0;right:-350px;top:64px;vertical-align:top;width:300px;border-left: 2px solid black;height: calc(100% - 70px);background:#00000020;padding:10px;overflow: auto;display: none">
+            <i class="material-icons" onclick="hideSideBar()" style="color: white;background: red;border-radius: 100px;padding: 10px;position: absolute;right: 280px;top: 48%;cursor: pointer;">close</i>
+            <ul id="theSeatingList" class="collapsible expandable "></ul>
+        </div>
+    </div>
+    
+
+    <div id="menuBar" style="position: absolute;height: 34px;border-radius: 10px;background-color: black;padding:10px;top:-1000px">
+        <span class="material-icons toolIcon" onclick="rotateEle()" style="font-size: 16px !important;position: relative;top: -2px;" >360</span>
+        <span class="material-icons toolIcon" onclick="incSize()" style="font-size: 16px !important;position: relative;top: -2px;" >add</span>
+        <span class="material-icons toolIcon" onclick="decSize()" style="font-size: 16px !important;position: relative;top: -2px;" >remove</span>
+        <span class="material-icons toolIcon" onclick="deleteEle()" style="font-size: 16px !important;position: relative;top: -2px;" >delete</span>
+        <span class="material-icons toolIcon" onclick="$('#menuBar').hide()" style="font-size: 16px !important;position: relative;top: -2px;" >cancel</span>
+    </div>
+  
+    <div id="theLegend" style="border: 1px solid red;position: absolute;top: -200px;left: 20%;background-color: white;padding: 10px;padding-top: 4px;"> 
+        <i class="material-icons" onclick="hideLegend()" style="color: white;background: red;border-radius: 100px;padding: 10px;position: absolute;left: 48%;bottom: -34px;cursor: pointer;">close</i>
+        Total Seats : <span class="paddingRight" id="totalSeats"></span>
+        Reserved Seats (<i class="material-icons adjustIcon black-text">event_seat</i>) : <span class="paddingRight" id="reservedSeats"></span>
+        Hot Seats (<i class="material-icons adjustIcon orange-text">event_seat</i>) : <span class="paddingRight" id="hotSeats"></span>
+        Alloted Seats (<i class="material-icons adjustIcon green-text">event_seat</i>) : <span class="paddingRight" id="allotSeats"></span>
+        Vaccant Seats (<i class="material-icons adjustIcon red-text">event_seat</i>) : <span class="paddingRight" id="vaccantSeats"></span>
+        Disabled Seats (<i class="material-icons adjustIcon grey-text">event_seat</i>) : <span class="paddingRight" id="disabledSeats"></span>
+    </div>
+
+    <div id="pieChartModal" class="modal">
+        <div class="modal-content">
+            <div>
+                <select class="browser-default" id="chartSelectOption" onchange="genRep(this.value)"></select>
+            </div>
+            <div id="canvas-holder" style="width:100%;padding-top: 40px;">
+                <canvas id="chart-area" ></canvas>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="disableOverFlow()">Close</a>
+        </div>
+      </div>
+
+</body>
+
+</html>
