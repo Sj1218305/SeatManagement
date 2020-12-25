@@ -5,12 +5,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
     <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.2.1/intro.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.2.1/introjs.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="/socket.io/socket.io.js"></script>
     <script>var socket = io();</script>
+    <script type="text/javascript">
+        window.onload = function() {
+    introJs().start();
+};
+    </script>
 
     <script>
         var isAddingSeat = false
@@ -61,8 +68,9 @@
             tableCtr ++;
             $(newTable).attr("id", "tableCount_" + tableCtr);
         }
-
-
+        function bug(){
+            alert("Save is disabled for now!");
+        }
         
 
         function changePos(data){
@@ -1014,7 +1022,7 @@
 
 <nav onmousedown="teamSelection_Nav()" style="width:2000px">
     
-    <select class="browser-default" onchange="floorSel_nav(this.value)" id="floorSel_nav" style="margin-top: 10px;width:200px;float:left;margin-left: 100px;">
+    <select data-title="Welcome! 👋" data-intro="Select a Floor to start"    class="browser-default" onchange="floorSel_nav(this.value)" id="floorSel_nav" style="margin-top: 10px;width:200px;float:left;margin-left: 100px;">
         <option selected disabled value="0">Select Floor</option>
         <option value="1">Floor 1</option>
         <option value="2">Floor 2</option>
@@ -1031,10 +1039,11 @@
 </nav>
 
     <div id="theToolBar" style="position: absolute;top:150px;left:6px;width: 50px;background-color: black;border-radius: 10px;padding-top: 10px;padding-bottom: 10px;display:none">
-        <a class="tooltipped" data-position="right" data-tooltip="Add a seat">
+        <a data-title="Seat" data-intro="Place seats on canvas"  class="tooltipped" data-position="right" data-tooltip="Add a seat">
             <span class="material-icons toolIcon disabled" id="addSeat" onclick="addSeat(this)">event_seat</span>
         </a>
         <br><br>
+        <div data-title="Tables" data-intro="Add variety of tables to your canvas">
         <a class="tooltipped" data-position="right" data-tooltip="Add Conference Table">
             <span class="material-icons toolIcon" id="addTable" onclick="addTable()">view_compact</span>
         </a>
@@ -1051,13 +1060,16 @@
             <span class="material-icons toolIcon" id="addTable_C" onclick="addTable_C()">stop_circle</span>
         </a>
         <br><br>
-        <a class="tooltipped" data-position="right" data-tooltip="Save">
+        </div>
+        <!-- <a class="tooltipped" data-position="right" data-tooltip="Save">
             <span class="material-icons toolIcon" onclick="saveProject()">save</span>
+        </a> -->
+        <a class="tooltipped" data-position="right" data-tooltip="Save">
+            <span class="material-icons toolIcon" onclick="bug()">save</span>
         </a>
         <br><br>
-        <a class="tooltipped" data-position="right" data-tooltip="Load">
-            <span class="material-icons toolIcon" onclick="loadProject()">cloud_circle</span>
-        </a>
+        <a data-title="Samples" data-intro="Load tha data and take a look on our samples" class="btn-floating btn pulse tooltipped" data-position="right" data-tooltip="Load" onclick="loadProject()">
+            <i class="material-icons">cloud</i></a>
         <br><br>
         <a class="tooltipped" data-position="right" data-tooltip="Enable Editing">
             <span class="material-icons toolIcon" onclick="enableEditing()">edit</span>
@@ -1067,11 +1079,11 @@
             <span class="material-icons toolIcon" onclick="disableEditing()">done_all</span>
         </a>
         <br><br>
-        <a class="tooltipped" data-position="right" data-tooltip="View Sidebar">
+        <a data-title="Sidebar" data-intro="Allocate variety of seats with the help of sidebar but dont forget to disable editing!" class="tooltipped" data-position="right" data-tooltip="View Sidebar">
             <span class="material-icons toolIcon" onclick="viewSideBar()">view_sidebar</span>
         </a>
         <br><br>
-            <a class="modal-trigger tooltipped" data-position="right" data-tooltip="View Reports in Chart" href="#pieChartModal" onclick="clearReportSelect()"><span class="material-icons toolIcon">pie_chart</span></a>
+            <a data-title="Get Stats" data-intro="Have a Demographic stats of your allocated seats" class="modal-trigger tooltipped" data-position="right" data-tooltip="View Reports in Chart" href="#pieChartModal" onclick="clearReportSelect()"><span class="material-icons toolIcon">pie_chart</span></a>
         <br><br>
         <a class="tooltipped" data-position="right" data-tooltip="View Legend">
             <span class="material-icons toolIcon" onclick="viewLegend()">receipt_long</span>
