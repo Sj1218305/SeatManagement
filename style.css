@@ -1,0 +1,39 @@
+.toolIcon{
+    color:white !important;
+    font-size: 30px !important;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.cursor{
+    cursor: grab;
+}
+
+.cursor:active{
+    cursor: grabbing;
+}
+
+.aSeat { 
+    content: " - Remember this";
+  }
+
+.distanctIcons{
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.adjustIcon{
+position: relative;
+top:6px;
+}
+
+.paddingRight{
+    padding-right: 20px;
+}
+
+.material-tooltip{
+    border-radius: 30px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
