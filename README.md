@@ -60,3 +60,10 @@ docker stop jscoffee/seat_management:1.0
 * Design a prototype for your place with a variety of tools and elements within no time
 * Allocate variety of Seats to different members 
 * Get a statistical analysis of amount of seats that are reserved, allocated or vacant.
+
+---
+
+## Screenshots [![Website Badge](https://img.shields.io/badge/Visit-Now-green?style=for-the-badge&logo=vercel)](https://manageseat.herokuapp.com/)
+
+![s1](https://imgur.com/Ytbqrch)
+![s2](https://imgur.com/Ujnw3jR)
