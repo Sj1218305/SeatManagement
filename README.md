@@ -24,6 +24,22 @@ Ever wanted to design CAD layouts for your offices, schools, movie halls etc., t
 <img src="https://img.shields.io/badge/-Nodejs-black?style=flat-square&amp;logo=Node.js" alt="Nodejs" class="screenshot">
 ![express](https://img.shields.io/badge/express-4.17.1-green)
 ![matrialize](https://img.shields.io/badge/materializecss-1.0.0-ff69b4)
+
+---
+
+# Features 
+
+* Design a prototype for your place with a variety of tools and elements within no time
+* Allocate variety of Seats to different members 
+* Get a statistical analysis of amount of seats that are reserved, allocated or vacant.
+
+---
+
+## Screenshots [![Website Badge](https://img.shields.io/badge/Visit-Now-green?style=for-the-badge&logo=vercel)](https://manageseat.herokuapp.com/)
+
+![Imgur1](https://imgur.com/Ujnw3jR.jpg)
+![Imgur2](https://imgur.com/Ytbqrch.jpg)
+
 ---
 
 ## Setup
@@ -53,17 +69,6 @@ docker run -p <PORT>:3000 jscoffee/seat_management:1.0
 #Shut down container
 docker stop jscoffee/seat_management:1.0
 ```
----
 
-# Features 
 
-* Design a prototype for your place with a variety of tools and elements within no time
-* Allocate variety of Seats to different members 
-* Get a statistical analysis of amount of seats that are reserved, allocated or vacant.
 
----
-
-## Screenshots [![Website Badge](https://img.shields.io/badge/Visit-Now-green?style=for-the-badge&logo=vercel)](https://manageseat.herokuapp.com/)
-
-![s1](https://imgur.com/Ytbqrch)
-![s2](https://imgur.com/Ujnw3jR)
