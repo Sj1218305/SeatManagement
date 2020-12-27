@@ -30,7 +30,7 @@ Ever wanted to design CAD layouts for your offices, schools, movie halls etc., t
 # Features 
 
 * Design a prototype for your place with a variety of tools and elements within no time
-* Allocate variety of Seats to different members 
+* Allocate different kinds of Seats to different members 
 * Get a statistical analysis of amount of seats that are reserved, allocated or vacant.
 
 ---
