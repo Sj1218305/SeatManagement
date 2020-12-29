@@ -1,4 +1,4 @@
-<p align="center"><img src="public/logo.png" width="500px" height="400px"></p>
+<p align="center"><img src="src/logo.png" width="500px" height="400px"></p>
 
 <p align="center">
 Design attractive CAD layouts for your places right on your browser
