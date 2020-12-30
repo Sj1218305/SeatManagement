@@ -846,23 +846,3 @@
   function zoomIn(e) {
     console.log(e)
   }
-
-
-  function panArea(e) {
-    e.preventDefault();
-    console.log(e)
-    if (e.button == "1") {
-        console.log("middle mouse cliked at : " + e.clientX, e.clientY);
-
-    }
-  }
-
-
-  function panAreaFinal(e) {
-    e.preventDefault();
-    console.log(e)
-    if (e.button == "1") {
-        console.log("middle mouse released at : " + e.clientX, e.clientY);
-        console.log($("#theCanvas").position());
-    }
-  }
