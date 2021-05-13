@@ -12,11 +12,11 @@ Design attractive CAD layouts for your places right on your browser
 
 </div>
 
----
+--
 
 Ever wanted to design CAD layouts for your offices, schools, movie halls etc., then SeatManagement is the right place for you  
 
----
+--
 
 ## Dependencies🗃:
 
