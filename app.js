@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+// todo: change them to let 
 var theData;
 var seatCtr;
 var tableCtr;
