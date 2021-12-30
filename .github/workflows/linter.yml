@@ -55,6 +55,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_DOCKERFILE_HADOLINT: true
-          VALIDATE_DOCKERFILE_HADOLINT: true
           VALIDATE_YAML: true
           VALIDATE_HTML: true
